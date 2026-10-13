@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { deleteRecipe, getRecipe, type RecipeRow } from '../lib/recipes'
 import { tidyRecipe } from '../lib/schema'
 import { useAuth } from '../lib/auth-context'
 import { RecipeScaler } from '../components/RecipeScaler'
 import { copyText } from '../lib/clipboard'
+import { resolveVariant, variantLabels } from '../lib/variants'
 
 export function RecipeView() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
   const { session, loading: authLoading } = useAuth()
   const [row, setRow] = useState<RecipeRow | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -32,6 +34,10 @@ export function RecipeView() {
   if (!row) return <p className="text-stone-500 text-sm">Loading…</p>
   const recipe = row.data
   const isOwner = session?.user.id === row.user_id
+  const labels = variantLabels(recipe)
+  const vParam = Number(params.get('v') ?? 0)
+  const vIndex = Number.isInteger(vParam) && vParam >= 0 && vParam < labels.length ? vParam : 0
+  const shown = resolveVariant(recipe, vIndex)
 
   async function copy(kind: 'json' | 'link') {
     const text = kind === 'json' ? JSON.stringify(tidyRecipe(recipe), null, 2) : window.location.href
@@ -57,7 +63,7 @@ export function RecipeView() {
           ← all recipes
         </Link>
         <h1 className="font-display text-3xl mt-1">{recipe.title}</h1>
-        {recipe.description && <p className="mt-1 text-stone-400">{recipe.description}</p>}
+        {shown.description && <p className="mt-1 text-stone-400">{shown.description}</p>}
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-stone-500">
           {!row.is_public && <span className="rounded border border-stone-700 px-1.5 py-0.5">private</span>}
           {recipe.servings && <span>{recipe.servings}</span>}
@@ -90,7 +96,21 @@ export function RecipeView() {
         )}
       </div>
 
-      <RecipeScaler recipe={recipe} />
+      {labels.length > 0 && (
+        <div className="flex flex-wrap rounded-md bg-stone-900 p-0.5 text-sm w-fit">
+          {labels.map((label, i) => (
+            <button
+              key={label}
+              className={`px-3 py-1 rounded cursor-pointer ${vIndex === i ? 'bg-amber-500 text-stone-950 font-medium' : 'text-stone-400 hover:text-stone-200'}`}
+              onClick={() => setParams(i === 0 ? {} : { v: String(i) }, { replace: true })}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <RecipeScaler recipe={shown} />
     </div>
   )
 }

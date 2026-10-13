@@ -41,7 +41,17 @@ export const AI_PROMPT = `Return this recipe as a single JSON object and nothing
   ],
   "steps": string[],
   "notes": string (optional),
-  "source": string (optional)
+  "source": string (optional),
+  "base_variant": string (optional),
+  "variants": [ (optional)
+    {
+      "name": string,
+      "ingredients": [ same shape as above, only the ingredients that change ],
+      "steps": string[] (optional),
+      "notes": string (optional),
+      "description": string (optional)
+    }
+  ]
 }
 
 Rules:
@@ -51,6 +61,7 @@ Rules:
 - "anchor" is the ingredient everything else is a ratio of (the meat, the flour). It must match an ingredient name exactly.
 - "group" is for sections like "dough" or "sauce". Omit it if the recipe has no sections.
 - "g_per_tsp" is grams per teaspoon. Include it only for small-amount ingredients that are unusual (not salt, sugar, common spices, oils, or sauces).
+- Only use "variants" when the recipe has real alternatives (e.g. with or without yogurt). The main fields describe one version, named by "base_variant". Each variant lists only the ingredients that differ: same name replaces it, grams 0 removes it, a new name adds it. Give a variant its own full "steps" if any step changes.
 - No markdown fences, no commentary.
 
 Example of a correct answer:

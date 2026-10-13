@@ -125,6 +125,7 @@ export function RecipeList() {
               <div className="mt-1 text-xs text-stone-500">
                 {r.data.ingredients.length} ingredients
                 {r.data.anchor && <> · by {r.data.anchor}</>}
+                {r.data.variants?.length ? <> · {r.data.variants.length + 1} versions</> : null}
               </div>
               {r.data.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">

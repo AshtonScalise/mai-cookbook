@@ -10,11 +10,13 @@ import { parseServings } from '../lib/nutrition'
 /** The ingredient table plus the "I have…" scaling panel. Everything below the title lives here. */
 export function RecipeScaler({ recipe }: { recipe: Recipe }) {
   const [scaling, setScaling] = useState(false)
-  const [basis, setBasis] = useState<number | null>(null)
+  // Basis is tracked by ingredient name so it survives switching between variants.
+  const [basis, setBasis] = useState<string | null>(null)
   const [amount, setAmount] = useState('')
   const [unit, setUnit] = useState<MassUnit>('g')
 
-  const basisIndex = basis ?? anchorIndex(recipe)
+  const named = basis ? recipe.ingredients.findIndex((i) => i.name === basis) : -1
+  const basisIndex = named >= 0 ? named : anchorIndex(recipe)
 
   const factor = useMemo(() => {
     if (!scaling) return 1
@@ -40,7 +42,7 @@ export function RecipeScaler({ recipe }: { recipe: Recipe }) {
   }
 
   function changeBasis(i: number) {
-    setBasis(i)
+    setBasis(recipe.ingredients[i].name)
     prefill(i)
   }
 

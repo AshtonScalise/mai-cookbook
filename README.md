@@ -57,3 +57,20 @@ npm run dev
 ```
 
 Optional fields: `description`, `servings`, `notes`, `source`, and per-ingredient `kcal_per_100g`, `note`, `group`, `g_per_tsp`.
+
+### Variants
+
+A recipe can have alternate versions, shown as a switch on the recipe page. The main fields are the base version, labelled by `base_variant`. Each entry in `variants` lists only what changes: an ingredient with the same name replaces the base one (`grams: 0` drops it), a new name is added, and `steps`, `notes` or `description` replace the base ones when given.
+
+```json
+"base_variant": "With yogurt",
+"variants": [
+  {
+    "name": "Without yogurt",
+    "ingredients": [
+      { "name": "5% plain yogurt", "grams": 0 },
+      { "name": "warm water", "grams": 90, "kcal_per_100g": 0 }
+    ]
+  }
+]
+```

@@ -130,6 +130,13 @@ export function RecipeEdit() {
         </>
       ) : (
         <div className="space-y-4">
+          {recipe.variants?.length ? (
+            <p className="rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm text-stone-300">
+              This form edits the base version ({recipe.base_variant || 'Original'}). Its other{' '}
+              {recipe.variants.length === 1 ? 'version' : `${recipe.variants.length} versions`} (
+              {recipe.variants.map((v) => v.name).join(', ')}) are kept as they are; change them in the JSON tab.
+            </p>
+          ) : null}
           <input
             className="w-full font-display text-2xl"
             placeholder="Title"

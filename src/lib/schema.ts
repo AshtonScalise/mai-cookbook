@@ -10,6 +10,19 @@ export const IngredientSchema = z.object({
   group: z.string().optional(),
 })
 
+/**
+ * An alternate version of the recipe. Ingredients are overrides matched to the base by name:
+ * same name replaces that ingredient (grams 0 drops it), a new name is added.
+ * steps / notes / description, when given, replace the base ones.
+ */
+export const VariantSchema = z.object({
+  name: z.string().min(1, 'variant name is required'),
+  description: z.string().optional(),
+  ingredients: z.array(IngredientSchema).default([]),
+  steps: z.array(z.string()).optional(),
+  notes: z.string().optional(),
+})
+
 export const RecipeSchema = z.object({
   title: z.string().min(1, 'title is required'),
   description: z.string().optional(),
@@ -21,10 +34,14 @@ export const RecipeSchema = z.object({
   steps: z.array(z.string()).default([]),
   notes: z.string().optional(),
   source: z.string().optional(),
+  /** label for the base version when variants exist, e.g. "With yogurt" */
+  base_variant: z.string().optional(),
+  variants: z.array(VariantSchema).optional(),
 })
 
 export type Ingredient = z.infer<typeof IngredientSchema>
 export type Recipe = z.infer<typeof RecipeSchema>
+export type Variant = z.infer<typeof VariantSchema>
 
 export type ParseResult = { ok: true; recipe: Recipe } | { ok: false; errors: string[] }
 
