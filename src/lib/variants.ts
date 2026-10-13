@@ -14,13 +14,27 @@ export function resolveVariant(recipe: Recipe, index: number): Recipe {
   const key = (name: string) => name.trim().toLowerCase()
   const overrides = new Map(variant.ingredients.map((i) => [key(i.name), i]))
   const ingredients: Ingredient[] = []
+  // Where a removed base ingredient sat, per group, so its replacements land in the same spot.
+  const removedAt = new Map<string | undefined, number>()
   for (const base of recipe.ingredients) {
     const o = overrides.get(key(base.name))
     overrides.delete(key(base.name))
     const merged = o ? { ...base, ...o } : base
     if (merged.grams > 0) ingredients.push(merged)
+    else if (!removedAt.has(base.group)) removedAt.set(base.group, ingredients.length)
   }
-  for (const added of overrides.values()) if (added.grams > 0) ingredients.push(added)
+  // New ingredients take the slot of a removed one in their group, else go after the group's last
+  // ingredient, else at the end, so grouped tables stay together.
+  for (const added of overrides.values()) {
+    if (added.grams <= 0) continue
+    let at = removedAt.get(added.group)
+    if (at === undefined) {
+      const last = ingredients.findLastIndex((ing) => ing.group === added.group)
+      at = last >= 0 ? last + 1 : ingredients.length
+    }
+    ingredients.splice(at, 0, added)
+    for (const [g, i] of removedAt) if (i >= at) removedAt.set(g, i + 1)
+  }
 
   return {
     ...recipe,

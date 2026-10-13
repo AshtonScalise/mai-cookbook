@@ -60,7 +60,7 @@ Optional fields: `description`, `servings`, `notes`, `source`, and per-ingredien
 
 ### Variants
 
-A recipe can have alternate versions, shown as a switch on the recipe page. The main fields are the base version, labelled by `base_variant`. Each entry in `variants` lists only what changes: an ingredient with the same name replaces the base one (`grams: 0` drops it), a new name is added, and `steps`, `notes` or `description` replace the base ones when given.
+A recipe can have alternate versions, shown as a switch on the recipe page. The main fields are the base version, labelled by `base_variant`. Each entry in `variants` lists only what changes: an ingredient with the same name replaces the base one (`grams: 0` drops it), a new name is added (where a removed ingredient of the same `group` was, otherwise after that group), and `steps`, `notes` or `description` replace the base ones when given.
 
 ```json
 "base_variant": "With yogurt",
