@@ -13,9 +13,15 @@ Vite + React + TypeScript + Tailwind v4. Supabase for auth and storage (one `rec
 ## Setup
 
 1. Create a free project at [supabase.com](https://supabase.com).
-2. In the Supabase dashboard, open **SQL Editor** and run [`supabase/schema.sql`](supabase/schema.sql).
+2. Apply the schema in [`supabase/migrations/`](supabase/migrations). Either:
+   - **GitHub integration (recommended):** *Project Settings → Integrations → GitHub*, connect this repo, Supabase directory `supabase`, production branch `main`, enable **Deploy to production**. Every push to `main` that adds a migration gets applied automatically.
+   - **Manually:** paste each migration file into the **SQL Editor** and run it, oldest first.
 3. Copy `.env.example` to `.env` and fill in **Project URL** and **anon public key** from *Project Settings → API*.
 4. (Optional, for faster dev) *Authentication → Providers → Email*: turn off **Confirm email** so sign-up logs you in immediately.
+
+### Changing the schema
+
+Add a new file to `supabase/migrations/` named `YYYYMMDDHHMMSS_description.sql` and push to `main`. Never edit a migration that has already been applied; add a new one instead.
 
 ```bash
 npm install

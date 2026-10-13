@@ -14,7 +14,7 @@ export function Setup() {
             Create a project at <span className="text-stone-200">supabase.com</span>.
           </li>
           <li>
-            Run <code className="text-amber-300">supabase/schema.sql</code> in the SQL editor.
+            Connect this GitHub repo under Project Settings → Integrations → GitHub, or paste <code className="text-amber-300">supabase/migrations/*.sql</code> into the SQL editor.
           </li>
           <li>
             Copy <code className="text-amber-300">.env.example</code> to <code className="text-amber-300">.env</code>{' '}

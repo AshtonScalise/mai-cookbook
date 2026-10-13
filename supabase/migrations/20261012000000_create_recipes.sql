@@ -1,5 +1,4 @@
--- Run this once in the Supabase SQL editor (Dashboard -> SQL Editor -> New query).
-
+-- Initial schema: one recipes table per user, protected by row-level security.
 create table if not exists public.recipes (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -19,7 +18,7 @@ create policy "users update own recipes" on public.recipes for update using (aut
 create policy "users delete own recipes" on public.recipes for delete using (auth.uid() = user_id);
 
 create or replace function public.set_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = '' as $$
 begin
   new.updated_at = now();
   return new;
@@ -29,3 +28,6 @@ drop trigger if exists recipes_set_updated_at on public.recipes;
 create trigger recipes_set_updated_at
   before update on public.recipes
   for each row execute function public.set_updated_at();
+
+-- Explicit grants so the Data API works even when auto-expose of new tables is off. RLS still limits rows per user.
+grant select, insert, update, delete on public.recipes to authenticated;
