@@ -1,0 +1,1 @@
+-- Seed data for local development (supabase db reset). Intentionally empty: recipes belong to real users.
