@@ -2,6 +2,8 @@
 
 Recipes by weight. Every recipe is a list of ingredients in grams with one **anchor** (the meat, the flour). Hit **Scale**, type how much anchor you actually have, and every line recomputes by ratio.
 
+Each line also shows calories, and the recipe shows a total plus a per-serving figure when `servings` starts with a number. Calories come from each ingredient's `kcal_per_100g`, or a built-in estimate by name when that's missing, so they scale with the recipe.
+
 Each line shows grams, plus pounds when it's at least half a pound, plus tsp/tbsp when it's a small amount (density is guessed from the ingredient name and can be overridden per ingredient with `g_per_tsp`).
 
 Recipes are public by default: anyone can browse and scale them without signing in, and owners can mark individual recipes private. Only the owner can edit or delete.
@@ -46,12 +48,12 @@ npm run dev
   "tags": ["beef", "seasoning"],
   "anchor": "ground beef",
   "ingredients": [
-    { "name": "ground beef", "grams": 907, "note": "80/20" },
-    { "name": "kosher salt", "grams": 11 },
+    { "name": "ground beef", "grams": 907, "kcal_per_100g": 254, "note": "80/20" },
+    { "name": "kosher salt", "grams": 11, "kcal_per_100g": 0 },
     { "name": "black pepper", "grams": 3, "g_per_tsp": 2.3 }
   ],
   "steps": ["Divide beef into balls.", "Smash, season, flip."]
 }
 ```
 
-Optional fields: `description`, `servings`, `notes`, `source`, and per-ingredient `note`, `group`, `g_per_tsp`.
+Optional fields: `description`, `servings`, `notes`, `source`, and per-ingredient `kcal_per_100g`, `note`, `group`, `g_per_tsp`.

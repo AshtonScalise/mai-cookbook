@@ -1,5 +1,6 @@
 import type { Ingredient } from '../lib/schema'
 import { formatGrams, formatPounds, formatSpoons, guessGPerTsp } from '../lib/units'
+import { ingredientKcal } from '../lib/nutrition'
 
 type Props = { ingredients: Ingredient[]; basisIndex: number }
 
@@ -14,6 +15,7 @@ export function IngredientTable({ ingredients, basisIndex }: Props) {
           <th className="text-left font-medium pb-2">Ingredient</th>
           <th className="text-right font-medium pb-2">Grams</th>
           <th className="text-right font-medium pb-2 hidden sm:table-cell">Also</th>
+          <th className="text-right font-medium pb-2 hidden sm:table-cell">kcal</th>
           <th className="text-right font-medium pb-2">%</th>
         </tr>
       </thead>
@@ -23,7 +25,7 @@ export function IngredientTable({ ingredients, basisIndex }: Props) {
           if (grouped && (i === 0 || ing.group !== ingredients[i - 1].group)) {
             rows.push(
               <tr key={`g${i}`}>
-                <td colSpan={4} className="pt-4 pb-1 text-xs uppercase tracking-wide text-amber-400">
+                <td colSpan={5} className="pt-4 pb-1 text-xs uppercase tracking-wide text-amber-400">
                   {ing.group ?? 'Other'}
                 </td>
               </tr>,
@@ -32,6 +34,13 @@ export function IngredientTable({ ingredients, basisIndex }: Props) {
           const lb = formatPounds(ing.grams)
           const spoons = formatSpoons(ing.grams, ing.g_per_tsp ?? guessGPerTsp(ing.name))
           const also = [lb, spoons].filter(Boolean).join(' · ')
+          const k = ingredientKcal(ing)
+          const kcalText = k ? Math.round(k.kcal).toLocaleString() : '—'
+          const kcalTitle = k
+            ? k.estimated
+              ? 'estimated from the ingredient name'
+              : 'from the recipe'
+            : 'no calorie data for this ingredient'
           const pct = basisGrams ? (ing.grams / basisGrams) * 100 : 0
           const isBasis = i === basisIndex
           rows.push(
@@ -39,10 +48,18 @@ export function IngredientTable({ ingredients, basisIndex }: Props) {
               <td className="py-2 pr-2">
                 <div className={isBasis ? 'text-amber-300 font-medium' : ''}>{ing.name}</div>
                 {ing.note && <div className="text-xs text-stone-500">{ing.note}</div>}
-                {also && <div className="text-xs text-stone-400 sm:hidden">{also}</div>}
+                <div className="text-xs text-stone-400 sm:hidden">
+                  {[also, k && `${kcalText} kcal`].filter(Boolean).join(' · ')}
+                </div>
               </td>
               <td className="py-2 text-right font-semibold tabular-nums whitespace-nowrap">{formatGrams(ing.grams)}</td>
               <td className="py-2 text-right text-stone-400 tabular-nums whitespace-nowrap hidden sm:table-cell">{also}</td>
+              <td
+                className={`py-2 pl-2 text-right tabular-nums hidden sm:table-cell ${k?.estimated ? 'text-stone-500' : 'text-stone-300'}`}
+                title={kcalTitle}
+              >
+                {kcalText}
+              </td>
               <td className="py-2 pl-2 text-right text-stone-500 tabular-nums">
                 {pct >= 10 ? Math.round(pct) : pct.toFixed(1)}
               </td>

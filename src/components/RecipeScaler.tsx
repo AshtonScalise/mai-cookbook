@@ -4,6 +4,8 @@ import { anchorIndex, scaleFactor, scaleIngredients } from '../lib/scale'
 import { G_PER_LB, toGrams, type MassUnit } from '../lib/units'
 import { IngredientTable } from './IngredientTable'
 import { ScalePanel } from './ScalePanel'
+import { CalorieSummary } from './CalorieSummary'
+import { parseServings } from '../lib/nutrition'
 
 /** The ingredient table plus the "I have…" scaling panel. Everything below the title lives here. */
 export function RecipeScaler({ recipe }: { recipe: Recipe }) {
@@ -67,6 +69,8 @@ export function RecipeScaler({ recipe }: { recipe: Recipe }) {
           Scale
         </button>
       )}
+
+      <CalorieSummary ingredients={scaled} servings={parseServings(recipe.servings)} factor={factor} />
 
       <IngredientTable ingredients={scaled} basisIndex={basisIndex} />
 

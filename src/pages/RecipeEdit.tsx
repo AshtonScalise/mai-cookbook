@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getRecipe, saveRecipe } from '../lib/recipes'
 import { emptyRecipe, parseRecipe, parseRecipeJson, tidyRecipe, type Ingredient, type Recipe } from '../lib/schema'
 import { guessGPerTsp } from '../lib/units'
+import { guessKcalPer100g } from '../lib/nutrition'
 import { JsonEditor } from '../components/JsonEditor'
 import { EXAMPLE_RECIPE } from '../data/prompt'
 
@@ -148,7 +149,7 @@ export function RecipeEdit() {
               onChange={(e) => setTagsText(e.target.value)}
             />
             <input
-              placeholder="servings (optional)"
+              placeholder="servings, e.g. 4 (optional)"
               value={recipe.servings ?? ''}
               onChange={(e) => setRecipe({ ...recipe, servings: e.target.value })}
             />
@@ -169,15 +170,16 @@ export function RecipeEdit() {
           </div>
 
           <div className="space-y-2">
-            <div className="grid grid-cols-[1fr_5rem_4.5rem_1fr_2rem] gap-2 text-xs uppercase tracking-wide text-stone-500 px-1">
+            <div className="grid grid-cols-[1fr_5rem_4.5rem_5rem_1fr_2rem] gap-2 text-xs uppercase tracking-wide text-stone-500 px-1">
               <span>Ingredient</span>
               <span>Grams</span>
               <span title="grams per teaspoon; auto-guessed from the name">g/tsp</span>
+              <span title="calories per 100 g; auto-guessed from the name">kcal/100g</span>
               <span>Note</span>
               <span />
             </div>
             {recipe.ingredients.map((ing, i) => (
-              <div key={i} className="grid grid-cols-[1fr_5rem_4.5rem_1fr_2rem] gap-2 items-center">
+              <div key={i} className="grid grid-cols-[1fr_5rem_4.5rem_5rem_1fr_2rem] gap-2 items-center">
                 <input
                   placeholder="kosher salt"
                   value={ing.name}
@@ -200,6 +202,17 @@ export function RecipeEdit() {
                   value={ing.g_per_tsp ?? ''}
                   onChange={(e) =>
                     updateIngredient(i, { g_per_tsp: e.target.value === '' ? undefined : Number(e.target.value) })
+                  }
+                />
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="any"
+                  placeholder={guessKcalPer100g(ing.name)?.toString() ?? '—'}
+                  value={ing.kcal_per_100g ?? ''}
+                  onChange={(e) =>
+                    updateIngredient(i, { kcal_per_100g: e.target.value === '' ? undefined : Number(e.target.value) })
                   }
                 />
                 <input

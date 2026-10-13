@@ -4,6 +4,8 @@ export const IngredientSchema = z.object({
   name: z.string().min(1, 'name is required'),
   grams: z.number().nonnegative('grams must be ≥ 0'),
   g_per_tsp: z.number().positive().optional(),
+  /** calories per 100 g; falls back to a built-in estimate by name when missing */
+  kcal_per_100g: z.number().nonnegative().optional(),
   note: z.string().optional(),
   group: z.string().optional(),
 })
