@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom'
-import { useAuth } from '../lib/auth'
+import { useAuth } from '../lib/auth-context'
 import { supabase } from '../lib/supabase'
 
 export function Layout() {

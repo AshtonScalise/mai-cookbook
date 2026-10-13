@@ -6,7 +6,6 @@ type Props = { ingredients: Ingredient[]; basisIndex: number }
 export function IngredientTable({ ingredients, basisIndex }: Props) {
   const basisGrams = ingredients[basisIndex]?.grams ?? 0
   const grouped = ingredients.some((i) => i.group)
-  let lastGroup: string | undefined
 
   return (
     <table className="w-full text-sm">
@@ -21,8 +20,7 @@ export function IngredientTable({ ingredients, basisIndex }: Props) {
       <tbody>
         {ingredients.flatMap((ing, i) => {
           const rows = []
-          if (grouped && (i === 0 || ing.group !== lastGroup)) {
-            lastGroup = ing.group
+          if (grouped && (i === 0 || ing.group !== ingredients[i - 1].group)) {
             rows.push(
               <tr key={`g${i}`}>
                 <td colSpan={4} className="pt-4 pb-1 text-xs uppercase tracking-wide text-amber-400">

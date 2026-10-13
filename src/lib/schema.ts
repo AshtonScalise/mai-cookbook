@@ -49,12 +49,18 @@ export function emptyRecipe(): Recipe {
   return { title: '', tags: [], ingredients: [{ name: '', grams: 0 }], steps: [] }
 }
 
-/** Strip empty optional fields so the JSON view stays clean. */
+/** Recipe JSON from the database, with defaults filled in. Falls back to the raw value if it no longer validates. */
+export function normalizeRecipe(input: unknown): Recipe {
+  const result = RecipeSchema.safeParse(input)
+  if (result.success) return result.data
+  const raw = input as Partial<Recipe>
+  return { ...raw, title: raw.title ?? '', tags: raw.tags ?? [], ingredients: raw.ingredients ?? [], steps: raw.steps ?? [] }
+}
+
+/** Strip empty optional fields so the JSON view stays clean. Arrays are kept so the shape stays stable. */
 export function tidyRecipe(r: Recipe): Recipe {
   const clean = <T extends object>(o: T): T =>
-    Object.fromEntries(
-      Object.entries(o).filter(([, v]) => v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)),
-    ) as T
+    Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== '')) as T
   return clean({
     ...r,
     ingredients: r.ingredients.map((i) => clean(i)),

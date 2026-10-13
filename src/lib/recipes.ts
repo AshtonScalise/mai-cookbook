@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Recipe } from './schema'
+import { normalizeRecipe, type Recipe } from './schema'
 
 export type RecipeRow = {
   id: string
@@ -10,16 +10,20 @@ export type RecipeRow = {
   updated_at: string
 }
 
+function toRow(raw: Record<string, unknown>): RecipeRow {
+  return { ...(raw as RecipeRow), data: normalizeRecipe(raw.data) }
+}
+
 export async function listRecipes(): Promise<RecipeRow[]> {
   const { data, error } = await supabase.from('recipes').select('*').order('updated_at', { ascending: false })
   if (error) throw error
-  return data as RecipeRow[]
+  return data.map(toRow)
 }
 
 export async function getRecipe(id: string): Promise<RecipeRow> {
   const { data, error } = await supabase.from('recipes').select('*').eq('id', id).single()
   if (error) throw error
-  return data as RecipeRow
+  return toRow(data)
 }
 
 export async function saveRecipe(recipe: Recipe, id?: string): Promise<RecipeRow> {
@@ -29,7 +33,7 @@ export async function saveRecipe(recipe: Recipe, id?: string): Promise<RecipeRow
     : supabase.from('recipes').insert(payload)
   const { data, error } = await query.select().single()
   if (error) throw error
-  return data as RecipeRow
+  return toRow(data)
 }
 
 export async function deleteRecipe(id: string): Promise<void> {

@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { useAuth } from './lib/auth'
+import { useAuth } from './lib/auth-context'
 import { supabaseConfigured } from './lib/supabase'
 import { Layout } from './components/Layout'
 import { Login } from './pages/Login'
