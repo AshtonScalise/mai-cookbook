@@ -1,7 +1,10 @@
+import { RecipeScaler } from '../components/RecipeScaler'
+import { EXAMPLE_RECIPE } from '../data/prompt'
+
 export function Setup() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-lg space-y-4">
+    <div className="mx-auto max-w-3xl px-4 py-10 space-y-10">
+      <div className="space-y-4">
         <h1 className="font-display text-3xl">
           m<span className="text-amber-400">AI</span> Cookbook
         </h1>
@@ -19,6 +22,13 @@ export function Setup() {
           </li>
           <li>Restart the dev server.</li>
         </ol>
+      </div>
+
+      <div className="space-y-3">
+        <div className="text-xs uppercase tracking-wide text-stone-500">Preview</div>
+        <h2 className="font-display text-2xl">{EXAMPLE_RECIPE.title}</h2>
+        <p className="text-stone-400 text-sm">{EXAMPLE_RECIPE.description}</p>
+        <RecipeScaler recipe={EXAMPLE_RECIPE} />
       </div>
     </div>
   )

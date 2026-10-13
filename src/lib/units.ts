@@ -91,7 +91,8 @@ export function formatSpoons(g: number, gPerTsp?: number): string | null {
   if (!gPerTsp || g <= 0) return null
   const tsp = g / gPerTsp
   if (tsp > MAX_SPOON_TSP) return null
-  const tspRounded = Math.round(tsp * 8) / 8
+  // eighths only under a teaspoon; quarters are what people actually measure above that
+  const tspRounded = tsp < 1 ? Math.round(tsp * 8) / 8 : Math.round(tsp * 4) / 4
   if (tspRounded < 3) {
     if (tspRounded === 0) return 'pinch'
     return `${fraction(tspRounded)} tsp`
