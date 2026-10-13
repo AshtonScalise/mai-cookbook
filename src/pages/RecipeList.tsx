@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { listMyRecipes, listPublicRecipes, type RecipeRow } from '../lib/recipes'
 import { useAuth } from '../lib/auth-context'
 import { AI_PROMPT } from '../data/prompt'
+import { copyText } from '../lib/clipboard'
 
 type View = 'mine' | 'everyone'
 
@@ -19,7 +20,7 @@ export function RecipeList() {
   const rows = current?.rows ?? null
   const error = current?.error ?? null
   const [query, setQuery] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'ok' | 'fail' | null>(null)
 
   useEffect(() => {
     if (authLoading) return
@@ -50,9 +51,8 @@ export function RecipeList() {
   }
 
   async function copyPrompt() {
-    await navigator.clipboard.writeText(AI_PROMPT)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    setCopied((await copyText(AI_PROMPT)) ? 'ok' : 'fail')
+    setTimeout(() => setCopied(null), 2000)
   }
 
   return (
@@ -92,7 +92,7 @@ export function RecipeList() {
               onClick={copyPrompt}
               title="Prompt that makes ChatGPT return recipes in this app's JSON"
             >
-              {copied ? 'Copied!' : 'Copy AI prompt'}
+              {copied === 'ok' ? 'Copied!' : copied === 'fail' ? 'Copy failed' : 'Copy AI prompt'}
             </button>
           </>
         )}

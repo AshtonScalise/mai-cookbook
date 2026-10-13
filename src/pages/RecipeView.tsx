@@ -4,6 +4,7 @@ import { deleteRecipe, getRecipe, type RecipeRow } from '../lib/recipes'
 import { tidyRecipe } from '../lib/schema'
 import { useAuth } from '../lib/auth-context'
 import { RecipeScaler } from '../components/RecipeScaler'
+import { copyText } from '../lib/clipboard'
 
 export function RecipeView() {
   const { id = '' } = useParams()
@@ -11,7 +12,7 @@ export function RecipeView() {
   const { session, loading: authLoading } = useAuth()
   const [row, setRow] = useState<RecipeRow | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [copied, setCopied] = useState<'json' | 'link' | null>(null)
+  const [copied, setCopied] = useState<{ kind: 'json' | 'link'; ok: boolean } | null>(null)
 
   // Wait for auth so a signed-in owner can load their private recipes.
   useEffect(() => {
@@ -34,9 +35,13 @@ export function RecipeView() {
 
   async function copy(kind: 'json' | 'link') {
     const text = kind === 'json' ? JSON.stringify(tidyRecipe(recipe), null, 2) : window.location.href
-    await navigator.clipboard.writeText(text)
-    setCopied(kind)
-    setTimeout(() => setCopied(null), 1500)
+    setCopied({ kind, ok: await copyText(text) })
+    setTimeout(() => setCopied(null), 2000)
+  }
+
+  function label(kind: 'json' | 'link', idle: string) {
+    if (copied?.kind !== kind) return idle
+    return copied.ok ? 'Copied!' : 'Copy failed'
   }
 
   async function remove() {
@@ -71,11 +76,11 @@ export function RecipeView() {
           </Link>
         )}
         <button className="btn btn-ghost" onClick={() => copy('json')}>
-          {copied === 'json' ? 'Copied!' : 'Copy JSON'}
+          {label('json', 'Copy JSON')}
         </button>
         {row.is_public && (
           <button className="btn btn-ghost" onClick={() => copy('link')}>
-            {copied === 'link' ? 'Copied!' : 'Copy link'}
+            {label('link', 'Copy link')}
           </button>
         )}
         {isOwner && (
