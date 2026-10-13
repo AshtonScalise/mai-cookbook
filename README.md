@@ -32,7 +32,7 @@ npm run dev
 
 1. Push this repo to GitHub.
 2. In Vercel, **Add New → Project**, import the repo. Framework preset: Vite.
-3. Add environment variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+3. No environment variables needed: `.env.production` holds the Supabase URL and publishable key, which are public by design. Never put the secret or service_role key in a `VITE_` variable.
 4. Deploy. `vercel.json` already rewrites all routes to `index.html` for client-side routing.
 5. In Supabase, *Authentication → URL Configuration*, set **Site URL** to your Vercel URL so magic links and email confirmations redirect correctly.
 
