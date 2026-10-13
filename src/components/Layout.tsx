@@ -3,7 +3,7 @@ import { useAuth } from '../lib/auth-context'
 import { supabase } from '../lib/supabase'
 
 export function Layout() {
-  const { session } = useAuth()
+  const { session, loading } = useAuth()
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-stone-800">
@@ -12,10 +12,20 @@ export function Layout() {
             m<span className="text-amber-400">AI</span> Cookbook
           </Link>
           <div className="flex items-center gap-3 text-sm text-stone-400">
-            <span className="hidden sm:inline truncate max-w-[200px]">{session?.user.email}</span>
-            <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>
-              Sign out
-            </button>
+            {session ? (
+              <>
+                <span className="hidden sm:inline truncate max-w-[200px]">{session.user.email}</span>
+                <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>
+                  Sign out
+                </button>
+              </>
+            ) : (
+              !loading && (
+                <Link to="/login" className="btn btn-primary">
+                  Sign in
+                </Link>
+              )
+            )}
           </div>
         </div>
       </header>

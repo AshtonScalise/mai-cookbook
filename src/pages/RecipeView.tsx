@@ -2,27 +2,41 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { deleteRecipe, getRecipe, type RecipeRow } from '../lib/recipes'
 import { tidyRecipe } from '../lib/schema'
+import { useAuth } from '../lib/auth-context'
 import { RecipeScaler } from '../components/RecipeScaler'
 
 export function RecipeView() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const { session, loading: authLoading } = useAuth()
   const [row, setRow] = useState<RecipeRow | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'json' | 'link' | null>(null)
 
+  // Wait for auth so a signed-in owner can load their private recipes.
   useEffect(() => {
+    if (authLoading) return
     getRecipe(id).then(setRow).catch((e) => setError(e.message))
-  }, [id])
+  }, [id, authLoading])
 
-  if (error) return <p className="text-red-300 text-sm">{error}</p>
+  if (error)
+    return (
+      <div className="space-y-2">
+        <Link to="/" className="text-xs text-stone-500 hover:text-stone-300">
+          ← all recipes
+        </Link>
+        <p className="text-red-300 text-sm">{error}</p>
+      </div>
+    )
   if (!row) return <p className="text-stone-500 text-sm">Loading…</p>
   const recipe = row.data
+  const isOwner = session?.user.id === row.user_id
 
-  async function copyJson() {
-    await navigator.clipboard.writeText(JSON.stringify(tidyRecipe(recipe), null, 2))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+  async function copy(kind: 'json' | 'link') {
+    const text = kind === 'json' ? JSON.stringify(tidyRecipe(recipe), null, 2) : window.location.href
+    await navigator.clipboard.writeText(text)
+    setCopied(kind)
+    setTimeout(() => setCopied(null), 1500)
   }
 
   async function remove() {
@@ -40,6 +54,7 @@ export function RecipeView() {
         <h1 className="font-display text-3xl mt-1">{recipe.title}</h1>
         {recipe.description && <p className="mt-1 text-stone-400">{recipe.description}</p>}
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+          {!row.is_public && <span className="rounded border border-stone-700 px-1.5 py-0.5">private</span>}
           {recipe.servings && <span>{recipe.servings}</span>}
           {recipe.tags.map((t) => (
             <span key={t} className="rounded bg-stone-800 px-1.5 py-0.5 text-stone-300">
@@ -50,15 +65,24 @@ export function RecipeView() {
       </div>
 
       <div className="flex flex-wrap gap-2 text-sm">
-        <Link to={`/r/${id}/edit`} className="btn btn-ghost">
-          Edit
-        </Link>
-        <button className="btn btn-ghost" onClick={copyJson}>
-          {copied ? 'Copied!' : 'Copy JSON'}
+        {isOwner && (
+          <Link to={`/r/${id}/edit`} className="btn btn-ghost">
+            Edit
+          </Link>
+        )}
+        <button className="btn btn-ghost" onClick={() => copy('json')}>
+          {copied === 'json' ? 'Copied!' : 'Copy JSON'}
         </button>
-        <button className="btn btn-danger ml-auto" onClick={remove}>
-          Delete
-        </button>
+        {row.is_public && (
+          <button className="btn btn-ghost" onClick={() => copy('link')}>
+            {copied === 'link' ? 'Copied!' : 'Copy link'}
+          </button>
+        )}
+        {isOwner && (
+          <button className="btn btn-danger ml-auto" onClick={remove}>
+            Delete
+          </button>
+        )}
       </div>
 
       <RecipeScaler recipe={recipe} />

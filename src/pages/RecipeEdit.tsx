@@ -21,12 +21,14 @@ export function RecipeEdit() {
   const [errors, setErrors] = useState<string[]>([])
   const [loaded, setLoaded] = useState(!id)
   const [saving, setSaving] = useState(false)
+  const [isPublic, setIsPublic] = useState(true)
 
   useEffect(() => {
     if (!id) return
     getRecipe(id)
       .then((row) => {
         load(row.data)
+        setIsPublic(row.is_public)
         setLoaded(true)
       })
       .catch((e) => setErrors([e.message]))
@@ -75,7 +77,7 @@ export function RecipeEdit() {
     setErrors([])
     setSaving(true)
     try {
-      const row = await saveRecipe(tidyRecipe(parsed.recipe), id)
+      const row = await saveRecipe(tidyRecipe(parsed.recipe), isPublic, id)
       navigate(`/r/${row.id}`)
     } catch (e) {
       setErrors([(e as Error).message])
@@ -241,6 +243,19 @@ export function RecipeEdit() {
           )}
         </div>
       )}
+
+      <label className="flex items-center gap-2 text-sm text-stone-300 cursor-pointer w-fit">
+        <input
+          type="checkbox"
+          className="size-4 accent-amber-500"
+          checked={isPublic}
+          onChange={(e) => setIsPublic(e.target.checked)}
+        />
+        Public
+        <span className="text-stone-500">
+          {isPublic ? 'anyone can view it, no sign-in needed' : 'only you can see it'}
+        </span>
+      </label>
 
       <div className="flex gap-2">
         <button className="btn btn-primary" onClick={save} disabled={saving}>

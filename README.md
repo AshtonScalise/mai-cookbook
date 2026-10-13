@@ -4,6 +4,8 @@ Recipes by weight. Every recipe is a list of ingredients in grams with one **anc
 
 Each line shows grams, plus pounds when it's at least half a pound, plus tsp/tbsp when it's a small amount (density is guessed from the ingredient name and can be overridden per ingredient with `g_per_tsp`).
 
+Recipes are public by default: anyone can browse and scale them without signing in, and owners can mark individual recipes private. Only the owner can edit or delete.
+
 Recipes are stored as JSON, so you can edit them in a form or as raw JSON, and import straight from ChatGPT using the **Copy AI prompt** button.
 
 ## Stack

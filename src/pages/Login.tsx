@@ -1,16 +1,18 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth-context'
 
 export function Login() {
   const { session, loading } = useAuth()
+  const location = useLocation()
+  const from = (location.state as { from?: string } | null)?.from ?? '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
 
-  if (!loading && session) return <Navigate to="/" replace />
+  if (!loading && session) return <Navigate to={from} replace />
 
   async function run(action: () => Promise<{ error: { message: string } | null }>, okText: string) {
     setBusy(true)
@@ -27,14 +29,14 @@ export function Login() {
 
   function signUp() {
     run(
-      () => supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } }),
+      () => supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + from } }),
       'Account created. If email confirmation is on, check your inbox.',
     )
   }
 
   function magicLink() {
     run(
-      () => supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } }),
+      () => supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin + from } }),
       'Magic link sent. Check your inbox.',
     )
   }
@@ -45,7 +47,12 @@ export function Login() {
         <h1 className="font-display text-3xl">
           m<span className="text-amber-400">AI</span> Cookbook
         </h1>
-        <p className="text-sm text-stone-400">Recipes by weight. Scale to what you bought.</p>
+        <p className="text-sm text-stone-400">
+          Recipes by weight. Scale to what you bought.{' '}
+          <Link to="/" className="text-amber-400 hover:underline">
+            Browse without signing in
+          </Link>
+        </p>
         <input
           type="email"
           required
