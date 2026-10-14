@@ -7,6 +7,15 @@ type Props = { ingredients: Ingredient[]; basisIndex: number }
 export function IngredientTable({ ingredients, basisIndex }: Props) {
   const basisGrams = ingredients[basisIndex]?.grams ?? 0
   const grouped = ingredients.some((i) => i.group)
+  // Show each section once: ingredients are gathered under their group in order of first appearance,
+  // so a recipe that lists a section's ingredients apart still renders one block per section.
+  const groupRank = new Map<string | undefined, number>()
+  ingredients.forEach((ing) => {
+    if (!groupRank.has(ing.group)) groupRank.set(ing.group, groupRank.size)
+  })
+  const order = ingredients
+    .map((_, i) => i)
+    .sort((a, b) => groupRank.get(ingredients[a].group)! - groupRank.get(ingredients[b].group)! || a - b)
 
   return (
     <table className="w-full text-sm">
@@ -20,9 +29,10 @@ export function IngredientTable({ ingredients, basisIndex }: Props) {
         </tr>
       </thead>
       <tbody>
-        {ingredients.flatMap((ing, i) => {
+        {order.flatMap((i, pos) => {
+          const ing = ingredients[i]
           const rows = []
-          if (grouped && (i === 0 || ing.group !== ingredients[i - 1].group)) {
+          if (grouped && (pos === 0 || ing.group !== ingredients[order[pos - 1]].group)) {
             rows.push(
               <tr key={`g${i}`}>
                 <td colSpan={5} className="pt-4 pb-1 text-xs uppercase tracking-wide text-amber-400">
